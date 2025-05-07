@@ -1,2 +1,5 @@
 .idea
 .cpcache
+.shadow-cljs
+resources/public/electric_starter_app/js
+.nrepl-port
