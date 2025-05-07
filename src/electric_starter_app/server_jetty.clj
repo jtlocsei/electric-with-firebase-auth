@@ -106,8 +106,8 @@ information."
     (wrap-index-page config) ; 4. otherwise fallback to default page file
     (wrap-resource (:resources-path config)) ; 3. serve static file from classpath
     (wrap-content-type) ; 2. detect content (e.g. for index.html)
-    (wrap-demo-router) ; 1. route
-    ))
+    (wrap-demo-router))) ; 1. route
+
 
 (defn middleware [config entrypoint]
   (-> (http-middleware config)  ; 2. otherwise, serve regular http content
@@ -130,8 +130,8 @@ information."
       (accept [_this _servletContext wsContainer]
         (.setIdleTimeout wsContainer (java.time.Duration/ofSeconds 60))
         (.setMaxBinaryMessageSize wsContainer (* 100 1024 1024)) ; 100M - temporary
-        (.setMaxTextMessageSize wsContainer (* 100 1024 1024))   ; 100M - temporary
-        ))))
+        (.setMaxTextMessageSize wsContainer (* 100 1024 1024))))))   ; 100M - temporary
+
 
 (defn start-server! [entrypoint
                      {:keys [port host]

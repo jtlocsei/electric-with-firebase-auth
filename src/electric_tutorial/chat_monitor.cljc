@@ -11,7 +11,7 @@
 
 #?(:clj (defonce !present (atom {}))) ; session-id -> user
 
-(e/defn Presence! [!present username ]
+(e/defn Presence! [!present username]
   (e/server
     (let [session-id (get-in e/http-request [:headers "sec-websocket-key"])]
       (swap! !present assoc session-id (or username "anon"))
