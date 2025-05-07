@@ -80,7 +80,9 @@ lost. Fixing this requires form semantics, see forms tutorial."
   (let [username (e/server (get-in e/http-request [:cookies "username" :value]))
         present (e/server (Presence! !present username))
         edits (ChatApp username present)]
+    (dom/div (dom/text "Before prn"))
     (prn 'edits (e/as-vec edits))
+    (dom/div (dom/text "After prn"))
     (e/for [[t message] (e/Filter some? edits)]
       (let [res (e/server (Create-message username message))]
         (case res
