@@ -15,4 +15,5 @@
               e/http-request (e/server ring-request)]
       ; mandatory wrapper div https://github.com/hyperfiddle/electric/issues/74
       (dom/div (dom/props {:style {:display "contents"}})
+        (ChatMonitor)
         (TopSecretStuff)))))
