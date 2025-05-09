@@ -1,10 +1,12 @@
 (ns electric-starter-app.firebase-stuff
   #?(:cljs (:require ["firebase/app" :refer [initializeApp]]
-                     ["firebase/auth" :refer [getAuth
-                                              signOut
-                                              createUserWithEmailAndPassword
+                     ["firebase/auth" :refer [createUserWithEmailAndPassword
+                                              getAuth
+                                              GoogleAuthProvider
+                                              onAuthStateChanged
                                               signInWithEmailAndPassword
-                                              onAuthStateChanged]]
+                                              signInWithPopup
+                                              signOut]]
                      [electric-starter-app.db :as db :refer [!client-db]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -52,7 +54,7 @@
   :_)
 
 
-;; Try creating a new user (cljs)
+;; Create a new user with email and password
 (comment
   (-> (createUserWithEmailAndPassword firebase-auth "john@acme.com" "password123")
     (.then (fn [user-credential]
@@ -68,7 +70,7 @@
   :_)
 
 
-;; Sign in a user
+;; Sign in a user with email and password
 (comment
   (-> (signInWithEmailAndPassword firebase-auth "john@acme.com" "password123")
     (.then (fn [user-credential]
@@ -89,8 +91,30 @@
     (.catch (fn [error]
               (js/console.log "Error when trying to sign out")
               (js/console.log error))))
-
   :_)
+
+
+
+(defonce google-auth-provider (GoogleAuthProvider.))
+
+
+;; Sign in a user with Google
+;; https://firebase.google.com/docs/auth/web/google-signin
+(comment
+  (-> (signInWithPopup firebase-auth google-auth-provider)
+    (.then (fn [result]
+             (let [user (.-user result)]
+               (reset! !user user)
+               (js/console.log "Signed in user:")
+               (js/console.log user))))
+   (.catch (fn [error]
+             (js/console.log "Sign in with google error code:" (.-code error))
+             (js/console.log "Sign in with google error message:" (.-message error))
+             (js/console.log "Sign in with google error user's email:" (-> error .-customData .-email)))))
+  :_)
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
