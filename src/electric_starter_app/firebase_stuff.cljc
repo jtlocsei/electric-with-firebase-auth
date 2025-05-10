@@ -10,7 +10,8 @@
                      [electric-starter-app.db :as db :refer [!client-db]])
      :clj (:require [clojure.java.io :as io]))
   #?(:clj (:import [com.google.auth.oauth2 GoogleCredentials]
-                   [com.google.firebase FirebaseApp FirebaseOptions])))
+                   [com.google.firebase FirebaseApp FirebaseOptions]
+                   [com.google.firebase.auth FirebaseAuth FirebaseToken])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Client
@@ -117,6 +118,15 @@
   :_)
 
 
+;; Print ID token of current user
+(comment
+  (-> (.getIdToken @!user)
+    (.then (fn [id-token]
+             (println id-token)))
+    (.catch (fn [error]
+              (js/console.log "Error with getIdToken of user" error))))
+  :_)
+
 
 
 
@@ -127,13 +137,30 @@
 ; https://firebase.google.com/docs/auth/admin/verify-id-tokens
 ;; TODO Learn how to check on server whether user logged in.
 
-
+;; Initialise the firebase SDK on the server
 #?(:clj
-   (defonce firebase-app
+   (defonce firebase-app ; never actually use this, but use defonce to make sure it only runs once
      (let [stream      (io/input-stream ".secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json")
            credentials (GoogleCredentials/fromStream stream)
            options     (-> (FirebaseOptions/builder) ; line 134
                          (.setCredentials credentials)
                          (.build))]
        (FirebaseApp/initializeApp options))))
+
+
+#?(:clj
+   (defn verify-id-token->uid
+     "Verify id token and return uid"
+     [id-token]
+     (-> (FirebaseAuth/getInstance)
+       (.verifyIdToken id-token)
+       (.getUid))))
+(comment
+  (let [id-token "eyJhbGciOiJSUzI1NiIsImtpZCI6IjU5MWYxNWRlZTg0OTUzNjZjOTgyZTA1MTMzYmNhOGYyNDg5ZWFjNzIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZWxlY3RyaWMtYXV0aCIsImF1ZCI6ImVsZWN0cmljLWF1dGgiLCJhdXRoX3RpbWUiOjE3NDY5MTc4NDYsInVzZXJfaWQiOiJEaTVsa21OVzBiYXFyUmFWVFNoVDZ0dWNUWncyIiwic3ViIjoiRGk1bGttTlcwYmFxclJhVlRTaFQ2dHVjVFp3MiIsImlhdCI6MTc0NjkxNzg0NiwiZXhwIjoxNzQ2OTIxNDQ2LCJlbWFpbCI6ImpvaG5AYWNtZS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiam9obkBhY21lLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.yoMDNvhUfAAwI5da151R_p3ylt1FUmorp9i9x3JLyMvQiQfyAZ8N8v-YdgNhY_112pUV6eo2jrJw3KPAiD-0m4h0N1mweFBHYbdhr0pALK_o4UxJfkT0B-M6fCHZ1mLp9QAbn7BmOGZobjIgA8XG3GQ1Rstbi2xaIyHKqbLMfPnGaucP9abhqkIA2TsL8phJbfwjIQPdvBVJdYYYkVUjKGrOxlRRCGEGHw0eaDYyzvG1Mt1xCKw-9GcwVqF78CjQ-mXeuBHX2rKyirv6GkNKBgVavx9y_J7HlthbHIQT9T7Xz-2o38b49amW992kpZBo9maBmSBQipOBV5amTJh9Tw"]
+    (-> (FirebaseAuth/getInstance)
+      (.verifyIdToken id-token)
+      (.getUid)))
+  :_)
+
+
 
