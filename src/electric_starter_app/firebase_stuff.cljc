@@ -7,7 +7,10 @@
                                               signInWithEmailAndPassword
                                               signInWithPopup
                                               signOut]]
-                     [electric-starter-app.db :as db :refer [!client-db]])))
+                     [electric-starter-app.db :as db :refer [!client-db]])
+     :clj (:require [clojure.java.io :as io]))
+  #?(:clj (:import [com.google.auth.oauth2 GoogleCredentials]
+                   [com.google.firebase FirebaseApp FirebaseOptions])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Client
@@ -94,8 +97,8 @@
   :_)
 
 
-
-(defonce google-auth-provider (GoogleAuthProvider.))
+#?(:cljs
+    (defonce google-auth-provider (GoogleAuthProvider.)))
 
 
 ;; Sign in a user with Google
@@ -123,3 +126,14 @@
 
 ; https://firebase.google.com/docs/auth/admin/verify-id-tokens
 ;; TODO Learn how to check on server whether user logged in.
+
+
+#?(:clj
+   (defonce firebase-app
+     (let [stream      (io/input-stream ".secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json")
+           credentials (GoogleCredentials/fromStream stream)
+           options     (-> (FirebaseOptions/builder) ; line 134
+                         (.setCredentials credentials)
+                         (.build))]
+       (FirebaseApp/initializeApp options))))
+
