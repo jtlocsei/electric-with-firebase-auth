@@ -5,3 +5,4 @@ resources/public/electric_starter_app/js
 .nrepl-port
 node_modules
 *.iml
+.secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json
