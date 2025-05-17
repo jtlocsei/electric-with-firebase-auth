@@ -43,3 +43,27 @@
   (get-user default-db)
   (get-user (set-user default-db {:about "fake user"}))
   :_)
+
+
+(defn set-id-token
+  [db firebase-id-token]
+  (assoc db :id-token firebase-id-token))
+(comment
+  (set-id-token default-db 1234)
+  :_)
+
+
+(defn remove-id-token
+  [db]
+  (dissoc db :id-token))
+(comment
+  (remove-id-token (set-id-token default-db 1234))
+  :_)
+
+
+(defn get-id-token
+  [db]
+  (:id-token db))
+(comment
+  (get-id-token (set-id-token default-db 1234))
+  :_)

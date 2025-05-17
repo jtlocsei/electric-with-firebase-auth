@@ -3,7 +3,10 @@
             [hyperfiddle.electric-dom3 :as dom]
             [electric-tutorial.chat-monitor :refer [ChatMonitor]])
   #?(:cljs
-     (:require [electric-starter-app.db :as db :refer [!client-db]])))
+     (:require [electric-starter-app.db :as db :refer [!client-db]]
+               [electric-starter-app.firebase-client :as fbc])
+     :clj
+     (:require [electric-starter-app.firebase-server :as fbs])))
 
 
 (e/defn TopSecretStuff
@@ -18,5 +21,11 @@
       ; mandatory wrapper div https://github.com/hyperfiddle/electric/issues/74
       (dom/div (dom/props {:style {:display "contents"}})
         #_(ChatMonitor)
-        (dom/div (dom/text "User: " (some-> (db/get-user (e/watch !client-db)) .-email)))
-        #_(TopSecretStuff)))))
+        (let [<client-db (e/watch !client-db)
+              id-token (db/get-id-token <client-db)]
+          (dom/div (dom/text "User: " (some-> (db/get-user <client-db) .-email)))
+          (dom/div (dom/text "ID Token: " id-token))
+          (dom/div (dom/text "Status: " (e/server (fbs/verify-id-token id-token))))
+          (if (= :ok (e/server (:status (fbs/verify-id-token id-token))))
+            (dom/div (dom/text "User verified"))
+            (dom/div (dom/text "User NOT verified"))))))))
