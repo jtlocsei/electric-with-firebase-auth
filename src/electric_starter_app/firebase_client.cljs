@@ -5,7 +5,6 @@
                                      GoogleAuthProvider
                                      onAuthStateChanged
                                      onIdTokenChanged
-                                     onIdTokenRevocation
                                      signInWithEmailAndPassword
                                      signInWithPopup
                                      signOut]]
@@ -31,7 +30,6 @@
 
 (defonce google-auth-provider
   (GoogleAuthProvider.))
-
 
 
 ;; Track the sign in state and save the user object in the client db
@@ -176,4 +174,3 @@
     refresh-id-token
     (* 1000 60 5))
   (reset! !token-refresh-timer-added? true))
-
