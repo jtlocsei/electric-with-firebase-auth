@@ -75,9 +75,6 @@
         (swap! !client-db db/remove-id-token)))))
 
 
-;; TODO Find a way to verify the user on the server automatically when auth state changed. Probably watch client-side atom with server side function
-
-
 ;; Create a new user with email and password
 (comment
   (-> (createUserWithEmailAndPassword firebase-auth "john@acme.com" "password123")
@@ -110,18 +107,22 @@
 
 ;; Sign out the current user (cljs)
 ;; https://firebase.google.com/docs/auth/web/password-auth (scroll to bottom)
-(comment
+(defn sign-out
+  []
   (-> (signOut firebase-auth)
     (.then (fn [] (js/console.log "Sign-out successful")))
     (.catch (fn [error]
               (js/console.log "Error when trying to sign out")
-              (js/console.log error))))
+              (js/console.log error)))))
+(comment
+  (sign-out)
   :_)
 
 
 ;; Sign in a user with Google
 ;; https://firebase.google.com/docs/auth/web/google-signin
-(comment
+(defn sign-in-with-google
+  []
   (-> (signInWithPopup firebase-auth google-auth-provider)
     (.then (fn [result]
              (let [user (.-user result)]
@@ -131,7 +132,9 @@
     (.catch (fn [error]
               (js/console.log "Sign in with google error code:" (.-code error))
               (js/console.log "Sign in with google error message:" (.-message error))
-              (js/console.log "Sign in with google error user's email:" (-> error .-customData .-email)))))
+              (js/console.log "Sign in with google error user's email:" (-> error .-customData .-email))))))
+(comment
+  (sign-in-with-google)
   :_)
 
 
