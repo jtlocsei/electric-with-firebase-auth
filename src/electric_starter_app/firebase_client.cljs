@@ -5,6 +5,7 @@
                                      GoogleAuthProvider
                                      onAuthStateChanged
                                      onIdTokenChanged
+                                     onIdTokenRevocation
                                      signInWithEmailAndPassword
                                      signInWithPopup
                                      signOut]]
@@ -31,8 +32,6 @@
 (defonce google-auth-provider
   (GoogleAuthProvider.))
 
-
-(defonce !user (atom nil))
 
 
 ;; Track the sign in state and save the user object in the client db
@@ -64,44 +63,32 @@
   (fn [user]
     (if user
       (do
-        (js/console.log "ID token changed. User is logged in")
         (-> (.getIdToken user)
           (.then (fn [id-token]
                    (swap! !client-db db/set-id-token id-token)))
           (.catch (fn [error]
-                    (js/console.log "Error with getIDToken" error)))))
+                    (js/console.log "Error with getIDToken" error))))
+        (js/console.log "ID token changed. User is logged in"))
       (do
-        (js/console.log "ID token changed. User logged out")
-        (swap! !client-db db/remove-id-token)))))
+        (swap! !client-db db/remove-id-token)
+        (js/console.log "ID token changed. User logged out")))))
 
 
-;; Create a new user with email and password
-(comment
-  (-> (createUserWithEmailAndPassword firebase-auth "john@acme.com" "password123")
-    (.then (fn [user-credential]
-             (let [user (.-user user-credential)]
-               (reset! !user user)
-               (js/console.log "Signed up user:")
-               (js/console.log user))))
-    (.catch (fn [error]
-              (js/console.log "Sign up error code:" (.-code error))
-              (js/console.log "Sign up error message:" (.-message error)))))
-
-  (js/console.log @!user)
-  :_)
-
-
-;; Sign in a user with email and password
-(comment
-  (-> (signInWithEmailAndPassword firebase-auth "john@acme.com" "password123")
-    (.then (fn [user-credential]
-             (let [user (.-user user-credential)]
-               (reset! !user user)
+;; Sign in a user with Google
+;; https://firebase.google.com/docs/auth/web/google-signin
+(defn sign-in-with-google
+  []
+  (-> (signInWithPopup firebase-auth google-auth-provider)
+    (.then (fn [result]
+             (let [user (.-user result)]
                (js/console.log "Signed in user:")
                (js/console.log user))))
     (.catch (fn [error]
-              (js/console.log "Sign in error code: " (.-code error))
-              (js/console.log "Sign in error message" (.-message error)))))
+              (js/console.log "Sign in with google error code:" (.-code error))
+              (js/console.log "Sign in with google error message:" (.-message error))
+              (js/console.log "Sign in with google error user's email:" (-> error .-customData .-email))))))
+(comment
+  (sign-in-with-google)
   :_)
 
 
@@ -119,28 +106,35 @@
   :_)
 
 
-;; Sign in a user with Google
-;; https://firebase.google.com/docs/auth/web/google-signin
-(defn sign-in-with-google
-  []
-  (-> (signInWithPopup firebase-auth google-auth-provider)
-    (.then (fn [result]
-             (let [user (.-user result)]
-               (reset! !user user)
+;; Create a new user with email and password
+(comment
+  (-> (createUserWithEmailAndPassword firebase-auth "john@acme.com" "password123")
+    (.then (fn [user-credential]
+             (let [user (.-user user-credential)]
+               (js/console.log "Signed up user:")
+               (js/console.log user))))
+    (.catch (fn [error]
+              (js/console.log "Sign up error code:" (.-code error))
+              (js/console.log "Sign up error message:" (.-message error)))))
+  :_)
+
+
+;; Sign in a user with email and password
+(comment
+  (-> (signInWithEmailAndPassword firebase-auth "john@acme.com" "password123")
+    (.then (fn [user-credential]
+             (let [user (.-user user-credential)]
                (js/console.log "Signed in user:")
                (js/console.log user))))
     (.catch (fn [error]
-              (js/console.log "Sign in with google error code:" (.-code error))
-              (js/console.log "Sign in with google error message:" (.-message error))
-              (js/console.log "Sign in with google error user's email:" (-> error .-customData .-email))))))
-(comment
-  (sign-in-with-google)
+              (js/console.log "Sign in error code: " (.-code error))
+              (js/console.log "Sign in error message" (.-message error)))))
   :_)
 
 
 ;; Print ID token of current user
 (comment
-  (-> (.getIdToken @!user)
+  (-> (.getIdToken (db/get-user @!client-db))
     (.then (fn [id-token]
              (println id-token)))
     (.catch (fn [error]
@@ -148,6 +142,14 @@
   :_)
 
 
+;; Force refresh of ID token
+(comment
+  (let [force-refresh true]
+    (-> (.getIdToken (.-currentUser firebase-auth) force-refresh)
+      (.then (fn [id-token]
+               (js/console.log "Forced refresh of ID token. New token: " id-token)))
+      (.catch (fn [error]
+                (js/console.log "Error when doing forced refresh of ID token. Error: " error)))))
+  :_)
+
 (js/console.log "firebase-client namespace loaded")
-
-
