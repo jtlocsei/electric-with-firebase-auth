@@ -47,4 +47,16 @@
   :_)
 
 
-;; TODO Add function to revoke an ID token https://firebase.google.com/docs/auth/admin/manage-sessions#revoke_refresh_tokens
+(defn revoke-refresh-tokens
+  "Revokes a user's refresh tokens and returns the revocation timestamp in seconds."
+  [uid]
+  (let [auth (FirebaseAuth/getInstance)]
+    (.revokeRefreshTokens auth uid)
+    (let [user (.getUser auth uid)
+          revocation-ms (.getTokensValidAfterTimestamp user)
+          revocation-s  (quot revocation-ms 1000)]
+      {:uid uid
+       :revoked-at revocation-s})))
+(comment
+  (revoke-refresh-tokens "eS7I5nyzXbYvbIxQje7nmTRUGKv1")
+  :_)

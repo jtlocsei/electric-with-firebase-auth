@@ -53,4 +53,5 @@
           (dom/h3 (dom/text "Debug info"))
           (dom/div (dom/text "User: " user-email))
           (dom/div (dom/text "ID Token: " id-token))
+          (dom/div (dom/text "UID: " (some-> (db/get-user <client-db) .-uid)))
           (dom/div (dom/text "Status: " (e/server (fbs/verify-id-token id-token)))))))))
