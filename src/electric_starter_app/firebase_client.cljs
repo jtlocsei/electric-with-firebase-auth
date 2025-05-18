@@ -36,15 +36,19 @@
 
 ;; Track the sign in state and save the user object in the client db
 ;; https://firebase.google.com/docs/auth/web/start#set_an_authentication_state_observer_and_get_user_data
-(onAuthStateChanged firebase-auth
-  (fn [user]
-    (if user
-      (do
-        (js/console.log "Auth state changed. Adding user")
-        (swap! !client-db db/set-user user))
-      (do
-        (js/console.log "Auth state changed. Removing user")
-        (swap! !client-db db/remove-user)))))
+(defonce !auth-state-change-listener-added? (atom false))
+(when-not @!auth-state-change-listener-added?
+  (do
+    (onAuthStateChanged firebase-auth
+      (fn [user]
+        (if user
+          (do
+            (js/console.log "Auth state changed. Adding user")
+            (swap! !client-db db/set-user user))
+          (do
+            (js/console.log "Auth state changed. Removing user")
+            (swap! !client-db db/remove-user)))))
+    (reset! !auth-state-change-listener-added? true)))
 (comment
   ; User's email
   (some-> (db/get-user @!client-db) .-email)
@@ -59,19 +63,22 @@
 
 ;; Keep track of the latest id token, which Firebase auto-refreshes every hour or so while logged in
 ;; https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth#onidtokenchanged
-(onIdTokenChanged firebase-auth
-  (fn [user]
-    (if user
-      (do
-        (-> (.getIdToken user)
-          (.then (fn [id-token]
-                   (swap! !client-db db/set-id-token id-token)))
-          (.catch (fn [error]
-                    (js/console.log "Error with getIDToken" error))))
-        (js/console.log "ID token changed. User is logged in"))
-      (do
-        (swap! !client-db db/remove-id-token)
-        (js/console.log "ID token changed. User logged out")))))
+(defonce !token-change-listener-added? (atom false))
+(when-not @!token-change-listener-added?
+  (onIdTokenChanged firebase-auth
+    (fn [user]
+      (if user
+        (do
+          (-> (.getIdToken user)
+            (.then (fn [id-token]
+                     (swap! !client-db db/set-id-token id-token)))
+            (.catch (fn [error]
+                      (js/console.log "Error with getIDToken" error))))
+          (js/console.log "ID token changed. User is logged in"))
+        (do
+          (swap! !client-db db/remove-id-token)
+          (js/console.log "ID token changed. User logged out")))))
+  (reset! !token-change-listener-added? true))
 
 
 ;; Sign in a user with Google
@@ -142,14 +149,31 @@
   :_)
 
 
-;; Force refresh of ID token
-(comment
-  (let [force-refresh true]
-    (-> (.getIdToken (.-currentUser firebase-auth) force-refresh)
+(defn refresh-id-token []
+  (when-let [user (.-currentUser firebase-auth)]
+    (-> (.getIdToken user true) ; force refresh true
       (.then (fn [id-token]
-               (js/console.log "Forced refresh of ID token. New token: " id-token)))
+               (swap! !client-db db/set-id-token id-token)
+               (js/console.log "Refreshed ID token")))
       (.catch (fn [error]
-                (js/console.log "Error when doing forced refresh of ID token. Error: " error)))))
-  :_)
+                (js/console.warn "ID token refresh failed. " error))))))
 
-(js/console.log "firebase-client namespace loaded")
+
+;; Refresh ID token when tab becomes visible again
+(defonce !tab-visibility-listener-added? (atom false))
+(when-not @!tab-visibility-listener-added?
+  (.addEventListener js/document "visibilitychange"
+    (fn []
+      (when (= (.-visibilityState js/document) "visible")
+        (refresh-id-token))))
+  (reset! !tab-visibility-listener-added? true))
+
+
+;; Refresh ID token every 5 minutes as fallback
+(defonce !token-refresh-timer-added? (atom false))
+(when-not @!token-refresh-timer-added?
+  (js/setInterval
+    refresh-id-token
+    (* 1000 60 5))
+  (reset! !token-refresh-timer-added? true))
+
