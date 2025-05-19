@@ -7,7 +7,7 @@
 
 
 ;; Initialise the firebase SDK on the server
-(defonce firebase-app ; never actually use this Var, but use defonce to make sure the code only runs once
+(defonce _firebase-initialisation ; use defonce to make sure code only runs once
   (let [stream      (io/input-stream ".secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json")
         credentials (GoogleCredentials/fromStream stream)
         options     (-> (FirebaseOptions/builder) ; line 134
