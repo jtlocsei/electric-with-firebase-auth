@@ -54,4 +54,4 @@
           (dom/p (dom/text "User: " user-email))
           (dom/p (dom/text "ID Token: " id-token))
           (dom/p (dom/text "UID: " (some-> (db/get-user <client-db) .-uid)))
-          (dom/p (dom/text "Status: " (e/server (fbs/verify-id-token id-token)))))))))
+          (dom/p (dom/text "Token Verification Status: " (e/server (fbs/verify-id-token id-token)))))))))
