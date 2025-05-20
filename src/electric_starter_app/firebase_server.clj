@@ -91,8 +91,11 @@
 (defn ^:private with-auth*
   "Internal helper. Verifies the Firebase ID token using `verify-id-token`.
    If the token is valid, calls (f claims & args), where `claims` is the map
-   returned from the decoded token. If the token is invalid or revoked,
-   returns nil and does not invoke `f`.
+   returned from the decoded token.
+
+   The Firebase UID is available under (:user_id claims).
+
+   If the token is invalid or revoked, returns nil and does not invoke `f`.
 
    - `id-token`: Firebase ID token (JWT string)
    - `check-revoked?`: boolean, whether to reject revoked tokens
@@ -107,6 +110,9 @@
 (defn with-auth
   "Verifies the Firebase ID token and, if valid, calls (f claims & args),
    where `claims` is the decoded Firebase claims map.
+
+   The Firebase UID is available under (:user_id claims).
+
    Does NOT check whether the token has been revoked."
   [id-token f & args]
   (apply with-auth* id-token false f args))
@@ -115,6 +121,8 @@
 (defn with-auth-check-revoked
   "Verifies the Firebase ID token and checks whether it has been revoked.
    If valid and not revoked, calls (f claims & args), where `claims` is the
-   decoded Firebase claims map."
+   decoded Firebase claims map.
+
+   The Firebase UID is available under (:user_id claims)."
   [id-token f & args]
   (apply with-auth* id-token true f args))
