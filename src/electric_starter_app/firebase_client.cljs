@@ -115,13 +115,13 @@
     (-> (.getIdToken user true) ; force refresh true
       (.then (fn [id-token]
                (swap! !client-db db/set-id-token id-token)
-               (js/console.log "Refreshed ID token")))
+               (js/console.log "Refreshed ID token.")))
       (.catch (fn [error]
                 (js/console.warn "ID token refresh failed. " error))))))
 
 
 ;; Refresh ID token when tab becomes visible again
-(defonce _visibility-listener ; use defonce to ensure code below only runs once
+(defonce ^:private _visibility-listener ; use defonce to ensure code below only runs once
   (.addEventListener js/document "visibilitychange"
     (fn []
       (when (= (.-visibilityState js/document) "visible")
@@ -129,7 +129,7 @@
 
 
 ;; Refresh ID token every 5 minutes as fallback
-(defonce _token-refresh-timer ; use defonce to ensure code below only runs once
+(defonce ^:private _token-refresh-timer ; use defonce to ensure code below only runs once
   (js/setInterval
     refresh-id-token
     (* 1000 60 5)))
@@ -156,16 +156,20 @@
 
 ; Track the sign in state and save the user object in the client db
 ;; https://firebase.google.com/docs/auth/web/start#set_an_authentication_state_observer_and_get_user_data
-(defonce _auth-state-change-listener ; use defonce to ensure code below only runs once
+(defn ^:private auth-state-change-handler
+  [user]
+  (if user
+    (do
+      (js/console.log "Auth state changed. Adding user.")
+      (swap! !client-db db/set-user user))
+    (do
+      (js/console.log "Auth state changed. Removing user")
+      (swap! !client-db db/remove-user))))
+
+(defonce ^:private _auth-state-change-listener ; use defonce to ensure code below only runs once
   (onAuthStateChanged firebase-auth
-    (fn [user]
-      (if user
-        (do
-          (js/console.log "Auth state changed. Adding user")
-          (swap! !client-db db/set-user user))
-        (do
-          (js/console.log "Auth state changed. Removing user")
-          (swap! !client-db db/remove-user))))))
+    (fn [user] (auth-state-change-handler user))))
+
 (comment
   ; User's email
   (some-> (db/get-user @!client-db) .-email)
@@ -180,19 +184,22 @@
 
 ;; Keep track of the latest id token when it changes
 ;; https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth#onidtokenchanged
-(defonce _id-token-change-listener ; use defonce to ensure code below only runs once
+(defn ^:private token-change-handler
+  [user]
+  (if user
+    (do
+      (-> (.getIdToken user)
+        (.then (fn [id-token]
+                 (swap! !client-db db/set-id-token id-token)))
+        (.catch (fn [error]
+                  (js/console.log "Error with getIDToken" error))))
+      (js/console.log "ID token changed. User is logged in"))
+    (do
+      (swap! !client-db db/remove-id-token)
+      (js/console.log "ID token changed. User logged out"))))
+
+(defonce ^:private _id-token-change-listener ; use defonce to ensure code below only runs once
   (onIdTokenChanged firebase-auth
-    (fn [user]
-      (if user
-        (do
-          (-> (.getIdToken user)
-            (.then (fn [id-token]
-                     (swap! !client-db db/set-id-token id-token)))
-            (.catch (fn [error]
-                      (js/console.log "Error with getIDToken" error))))
-          (js/console.log "ID token changed. User is logged in"))
-        (do
-          (swap! !client-db db/remove-id-token)
-          (js/console.log "ID token changed. User logged out"))))))
+    (fn [user] (token-change-handler user))))
 
 
