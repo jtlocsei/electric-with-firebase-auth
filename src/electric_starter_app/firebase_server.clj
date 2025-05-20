@@ -17,9 +17,21 @@
     (FirebaseApp/initializeApp options)))
 
 
-(defn token->claims-map [^FirebaseToken token]
-  ; Uses Java magic. Plain (into {}...) returned something that looked like a map but that you couldn't
-  ; keywordize the keys of.
+(defn token->claims-map
+  "Extracts the claims from a FirebaseToken as a plain Clojure map
+   with keywordized keys.
+
+   The result is a true Clojure map — not a Java-backed map — to avoid
+   issues where some operations (e.g. `walk/keywordize-keys`) fail due
+   to Guava's immutable map internals.
+
+   Example return:
+   {:user_id \"abc123\", :email \"foo@example.com\", :admin true, ...}
+
+   Note: This manually walks the Java Map entries because `(into {})`
+   on `.getClaims` may return a Guava map that does not behave like
+   a native Clojure map."
+  [^FirebaseToken token]
   (into {}
     (for [^Map$Entry entry (.entrySet (.getClaims token))]
       [(keyword (.getKey entry)) (.getValue entry)])))
