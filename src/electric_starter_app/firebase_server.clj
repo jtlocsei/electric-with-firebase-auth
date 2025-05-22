@@ -38,12 +38,15 @@
 
 
 (defn verify-id-token
-  "Verifies the Firebase ID token and checks for revocation.
-  Returns a map like:
-    {:status :ok, :claims {:user_id \"ak2j5lha3sd3fl\" ...}}
-    {:status :revoked}
-    {:status :invalid}
-    {:status :token-is-nil}"
+  "Verifies the Firebase ID token and optionally checks for revocation.
+
+   On success, returns:
+     {:verified true, :claims {...}}
+
+   On failure, returns one of:
+     {:verified false, :reason :revoked}
+     {:verified false, :reason :invalid}
+     {:verified false, :reason :nil-token}"
   [id-token & {:keys [check-revoked] :or {check-revoked true}}]
   ;; Docs https://firebase.google.com/docs/auth/admin/verify-id-tokens
   (if id-token
@@ -51,37 +54,35 @@
       (let [auth   (FirebaseAuth/getInstance)
             token  (.verifyIdToken auth id-token check-revoked)
             claims (token->claims-map token)]
-        {:status :ok, :claims claims})
+        {:verified true, :claims claims})
       (catch FirebaseAuthException e
         (let [error-code (.getAuthErrorCode e)]
-          (cond
-            (= error-code AuthErrorCode/REVOKED_ID_TOKEN)
-            {:status :revoked}
-
-            :else
-            {:status :invalid}))))
-    {:status :token-is-nil}))
+          {:verified false
+           :reason (if (= error-code AuthErrorCode/REVOKED_ID_TOKEN)
+                     :revoked
+                     :invalid)})))
+    {:verified false :reason :nil-token}))
 
 
 (comment
-  (verify-id-token "paste-token-here")
+  (verify-id-token "eyJhbGciOiJSUzI1NiIsImtpZCI6IjY3ZDhjZWU0ZTYwYmYwMzYxNmM1ODg4NTJiMjA5MTZkNjRjMzRmYmEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVG9iaWFzIExvY3NlaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMRW5Tenc1ZkpnN3Z5RzRkYVJtUGYzLUZyRnZzSGlxT2hQZUxjTWlIdGJoRTRJaENJYj1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9lbGVjdHJpYy1hdXRoIiwiYXVkIjoiZWxlY3RyaWMtYXV0aCIsImF1dGhfdGltZSI6MTc0NzcwNDg4MywidXNlcl9pZCI6ImVTN0k1bnl6WGJZdmJJeFFqZTdubVRSVUdLdjEiLCJzdWIiOiJlUzdJNW55elhiWXZiSXhRamU3bm1UUlVHS3YxIiwiaWF0IjoxNzQ3ODk0OTkwLCJleHAiOjE3NDc4OTg1OTAsImVtYWlsIjoianRsb2NzZWlAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDU1NTIyNjIyMzU4MzcyMDM5MDUiXSwiZW1haWwiOlsianRsb2NzZWlAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.lHik3Oo-y197xuVaMH5Fe4QQgdEnnGkaYijxH6Be9RCW3sYW8pbNp9QX4k33otr0EahTVgPReIvr5sEa8sqJsX1iwNCRmH_Lz-WKlkMJxd0XX32QaVU3J0wcSqdOjhGpVCc23D2irRSqkpWu8TsDJGbItXht4i0-M1iyw4fQceOOXDsKYoUf2nlGMcCNEj1NUVCIu2zoMQXLRtBWsow9uOiliBz8RLGaNLLx2l4WYK3hbWenTUk_rv-HnL-aB7fcQfbuYNOhPH7frFLP1sOyVMBcR5xjO6FyDBD593ruuLWORJ2Lc1C52Ux3qkY2z52rXNmDAlx6i1nQdnn5KsKobA")
   ;=>
-  ;{:status :ok,
-  ; :claims {:firebase {"identities" {"google.com" ["105552262235837203905"], "email" ["________@gmail.com"]},
-  ;                     "sign_in_provider" "google.com"},
-  ;          :email "________@gmail.com",
-  ;          :aud "electric-auth",
-  ;          :sub "eS7I5nyzXbYvbIxQje7nmTRUGKv1",
-  ;          :iss "https://securetoken.google.com/electric-auth",
-  ;          :name "______ ________",
-  ;          :exp 1747661821,
-  ;          :email_verified true,
-  ;          :auth_time 1747558132,
-  ;          :picture "https://lh3.googleusercontent.com/a/ACg8ocLEnSzw5fJg7vyG4daRmPf3-FrFvsHiqOhPeLcMiHtbhE4IhCIb=s96-c",
-  ;          :user_id "eS7I5nyzXbYvbIxQje7nmTRUGKv1",
-  ;          :iat 1747658221}}
+  ;{:verified true,
+  ; :claims   {:firebase       {"identities"       {"google.com" ["105552262235837203905"], "email" ["________@gmail.com"]},
+  ;                             "sign_in_provider" "google.com"},
+  ;            :email          "________@gmail.com",
+  ;            :aud            "electric-auth",
+  ;            :sub            "eS7I5nyzXbYvbIxQje7nmTRUGKv1",
+  ;            :iss            "https://securetoken.google.com/electric-auth",
+  ;            :name           "______ ________",
+  ;            :exp            1747661821,
+  ;            :email_verified true,
+  ;            :auth_time      1747558132,
+  ;            :picture        "https://lh3.googleusercontent.com/a/ACg8ocLEnSzw5fJg7vyG4daRmPf3-FrFvsHiqOhPeLcMiHtbhE4IhCIb=s96-c",
+  ;            :user_id        "eS7I5nyzXbYvbIxQje7nmTRUGKv1",
+  ;            :iat            1747658221}}
 
-  (verify-id-token nil) ; => {:status :token-is-nil}
+  (verify-id-token nil) ; => {:verified false, :error :token-is-nil}
   :_)
 
 
@@ -114,16 +115,18 @@
    - `f`: function to call with claims and any args
    - `args`: optional additional args passed to `f`"
   [id-token check-revoked? f & args]
-  (let [{:keys [status claims]} (verify-id-token id-token :check-revoked check-revoked?)]
-    (when (= status :ok)
+  (let [{:keys [verified claims]} (verify-id-token id-token :check-revoked check-revoked?)]
+    (when verified
       (apply f claims args))))
 
 
 (defn with-auth
-  "Verifies the Firebase ID token and, if valid, calls (f claims & args),
+  "Verifies the Firebase ID token and, if verified, calls (f claims & args),
    where `claims` is the decoded Firebase claims map.
 
    The Firebase UID is available under (:user_id claims).
+
+   If the token is invalid or revoked, returns nil and does not invoke `f`.
 
    Does NOT check whether the token has been revoked."
   [id-token f & args]
@@ -132,9 +135,11 @@
 
 (defn with-auth-check-revoked
   "Verifies the Firebase ID token and checks whether it has been revoked.
-   If valid and not revoked, calls (f claims & args), where `claims` is the
+   If verified and not revoked, calls (f claims & args), where `claims` is the
    decoded Firebase claims map.
 
-   The Firebase UID is available under (:user_id claims)."
+   The Firebase UID is available under (:user_id claims).
+
+   If the token is invalid or revoked, returns nil and does not invoke `f`."
   [id-token f & args]
   (apply with-auth* id-token true f args))
