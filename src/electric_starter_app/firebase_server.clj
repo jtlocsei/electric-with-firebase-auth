@@ -7,7 +7,16 @@
 
 
 
-;; Initialise the firebase SDK on the server
+;; Initialise the firebase SDK on the server.
+;; Replace the path below with the path to your Firebase Admin SDK service account JSON file.
+;; To get your service account credentials:
+;; 1. Go to Firebase Console -> Project Settings -> Service Accounts
+;; 2. Click "Generate New Private Key"
+;; 3. Save the downloaded JSON file in your .secret directory
+;; 4. Update the path below to match your JSON filename
+;; Note: In production, use environment variables instead of a JSON file
+;; SECURITY WARNING: Never commit your service account key to source control!
+;; The .gitignore file is set up to prevent this, but be careful if you rename or move the file.
 (defonce _firebase-initialisation ; use defonce to make sure code only runs once
   (let [stream      (io/input-stream ".secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json")
         credentials (GoogleCredentials/fromStream stream)
@@ -65,21 +74,21 @@
 
 
 (comment
-  (verify-id-token "eyJhbGciOiJSUzI1NiIsImtpZCI6IjY3ZDhjZWU0ZTYwYmYwMzYxNmM1ODg4NTJiMjA5MTZkNjRjMzRmYmEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiVG9iaWFzIExvY3NlaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMRW5Tenc1ZkpnN3Z5RzRkYVJtUGYzLUZyRnZzSGlxT2hQZUxjTWlIdGJoRTRJaENJYj1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9lbGVjdHJpYy1hdXRoIiwiYXVkIjoiZWxlY3RyaWMtYXV0aCIsImF1dGhfdGltZSI6MTc0NzcwNDg4MywidXNlcl9pZCI6ImVTN0k1bnl6WGJZdmJJeFFqZTdubVRSVUdLdjEiLCJzdWIiOiJlUzdJNW55elhiWXZiSXhRamU3bm1UUlVHS3YxIiwiaWF0IjoxNzQ3ODk0OTkwLCJleHAiOjE3NDc4OTg1OTAsImVtYWlsIjoianRsb2NzZWlAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDU1NTIyNjIyMzU4MzcyMDM5MDUiXSwiZW1haWwiOlsianRsb2NzZWlAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.lHik3Oo-y197xuVaMH5Fe4QQgdEnnGkaYijxH6Be9RCW3sYW8pbNp9QX4k33otr0EahTVgPReIvr5sEa8sqJsX1iwNCRmH_Lz-WKlkMJxd0XX32QaVU3J0wcSqdOjhGpVCc23D2irRSqkpWu8TsDJGbItXht4i0-M1iyw4fQceOOXDsKYoUf2nlGMcCNEj1NUVCIu2zoMQXLRtBWsow9uOiliBz8RLGaNLLx2l4WYK3hbWenTUk_rv-HnL-aB7fcQfbuYNOhPH7frFLP1sOyVMBcR5xjO6FyDBD593ruuLWORJ2Lc1C52Ux3qkY2z52rXNmDAlx6i1nQdnn5KsKobA")
+  (verify-id-token "paste id token here")
   ;=>
   ;{:verified true,
   ; :claims   {:firebase       {"identities"       {"google.com" ["105552262235837203905"], "email" ["________@gmail.com"]},
   ;                             "sign_in_provider" "google.com"},
   ;            :email          "________@gmail.com",
   ;            :aud            "electric-auth",
-  ;            :sub            "eS7I5nyzXbYvbIxQje7nmTRUGKv1",
+  ;            :sub            "B8mH7YlD3fZxTq9rWv2aLpOsRgCn",
   ;            :iss            "https://securetoken.google.com/electric-auth",
   ;            :name           "______ ________",
   ;            :exp            1747661821,
   ;            :email_verified true,
   ;            :auth_time      1747558132,
-  ;            :picture        "https://lh3.googleusercontent.com/a/ACg8ocLEnSzw5fJg7vyG4daRmPf3-FrFvsHiqOhPeLcMiHtbhE4IhCIb=s96-c",
-  ;            :user_id        "eS7I5nyzXbYvbIxQje7nmTRUGKv1",
+  ;            :picture        "https://lh3.googleusercontent.com/a/ACd9pQwErBxu8NkL3zYmFtXvJeA6-GtVmsLoUzRkWvXiCpqhdJ7MgZTb=s96-c",
+  ;            :user_id        "B8mH7YlD3fZxTq9rWv2aLpOsRgCn",
   ;            :iat            1747658221}}
 
   (verify-id-token nil) ; => {:verified false, :error :token-is-nil}
@@ -145,5 +154,5 @@
       {:uid uid
        :revoked-at revocation-s})))
 (comment
-  (revoke-refresh-tokens "eS7I5nyzXbYvbIxQje7nmTRUGKv1")
+  (revoke-refresh-tokens "B8mH7YlD3fZxTq9rWv2aLpOsRgCn")
   :_)

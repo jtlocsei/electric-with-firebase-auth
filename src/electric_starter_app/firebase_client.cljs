@@ -11,9 +11,14 @@
             [electric-starter-app.db :as db :refer [!client-db]]))
 
 
-;; Note to self: See ChatGPT conversation "Google OAuth with Electric"
 
 
+;; Replace this config with your own Firebase configuration object.
+;; To get your config:
+;; 1. Go to Firebase Console -> Your Project -> Project Settings
+;; 2. Under "Your apps", click the web app icon (</>)
+;; 3. Register app if you haven't already
+;; 4. Copy the config object from the code snippet
 (def firebase-config
   #js {:apiKey            "AIzaSyC2-qOKdgDLnCiw5Iq7NgX8CRr47outuGU"
        :authDomain        "electric-auth.firebaseapp.com"
@@ -203,3 +208,4 @@
     (fn [user] (token-change-handler user))))
 
 
+;; Note to self: See ChatGPT conversation "Google OAuth with Electric"

@@ -1,7 +1,7 @@
 (ns electric-starter-app.main
   (:require [hyperfiddle.electric3 :as e]
-            [hyperfiddle.electric-dom3 :as dom]
-            [electric-tutorial.chat-monitor :refer [ChatMonitor]])
+            [hyperfiddle.electric-dom3 :as dom])
+            ;[electric-tutorial.chat-monitor :refer [ChatMonitor]])
   #?(:cljs
      (:require [goog.string.StringBuffer]
                [electric-starter-app.db :as db :refer [!client-db]]
@@ -62,8 +62,9 @@
   (let [user-email (some-> (db/get-user client-db) .-email)
         ;; When calling server functions that require auth, wrap them in `when-verified`
         ;; or `when-verified-strict` and pass in the Firebase id-token. On the server, when
+        ;; the token is verified, the function will be called with the claims map containing
+        ;; the user's Firebase UID and other information from the token.
         user-note (e/server (when-verified id-token restricted/get-note))]
-    ;; TODO add demo of performing secure action on the server, by passing id-token and verifying it on the server
     (dom/h2 (dom/text "You are logged in"))
     (dom/p (dom/text "You are logged in as " user-email))
     (LogoutButton)
