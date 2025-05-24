@@ -32,6 +32,10 @@ Before using this example, you'll need to:
 - The `.gitignore` file already excludes `.secret/` to help prevent this
 - For production deployment, use environment variables for Firebase credentials instead of JSON files
 
+**Further Reading**:
+- [Firebase Web Authentication Guide](https://firebase.google.com/docs/auth/web/start) - Essential reading for understanding how Firebase authentication works in web applications
+- [Firebase Token Verification Guide](https://firebase.google.com/docs/auth/admin/verify-id-tokens) - Important documentation about server-side token verification
+
 ## db.cljs
 The `db.cljs` file serves as a simple client-side state management system for the Firebase authentication data. Here are its main purposes:
 
