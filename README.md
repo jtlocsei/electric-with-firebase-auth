@@ -79,6 +79,37 @@ Example usage from `main.cljc`:
 This verifies the user's token before allowing access to restricted functionality.
 
 
+## restricted.clj
+The `restricted.clj` file demonstrates how to implement functions that access private data in an Electric application. **Important**: These functions must always be wrapped with authentication checks (via `when-verified` or `when-verified-strict`) to ensure data security.
+
+Here are its main purposes:
+
+1. **User Data Storage**
+   - Maintains a simple in-memory store of user notes using an atom `!user-notes`
+   - Maps user IDs to their personal notes: `{user-id -> string}`
+
+2. **Protected Operations**
+   - `get-note`: Retrieves a user's personal note based on their Firebase user ID
+   - `set-note!`: Updates a user's personal note with new text
+   - Both functions expect Firebase claims as input (containing `:user_id`)
+
+3. **Security Integration**
+   The file works in conjunction with `firebase_server.clj` - its functions must be called through verification wrappers:
+
+   ```clojure
+   ;; Example from main.cljc
+   (e/server (when-verified id-token restricted/get-note))
+   (e/server (when-verified-strict id-token restricted/set-note! s))
+   ```
+
+   This ensures that:
+   - Only authenticated users can access their notes
+   - Users can only access their own notes (via their user ID in claims)
+   - More sensitive operations (like `set-note!`) can optionally use stricter verification
+
+The file demonstrates a pattern for implementing protected resources in an Electric application using Firebase authentication. While this example uses simple in-memory storage, the same pattern applies when accessing databases or other sensitive resources.
+
+
 
 # Electric v3 Starter App
 
