@@ -204,7 +204,7 @@ The file demonstrates a pattern for implementing protected resources in an Elect
 
 ## build.clj modification for uberjar
 
-When building an uberjar, you may encounter a Cannot write META-INF/license/LICENSE.aix-netbsd.txt error. This is caused by a conflict between JARs included by the Firebase Admin SDK — specifically, the grpc-netty-shaded dependency used internally by Firebase. One library includes META-INF/license as a file, while another expects it to be a directory, which causes tools.build to fail when merging the classpath. To resolve this, you need to add :exclude [#"META-INF/license/LICENSE.*"] to the b/uber call in your build.clj. This safely skips the conflicting license files while still including all required Firebase functionality.
+When building an uberjar, you may encounter a `Cannot write META-INF/license/LICENSE.aix-netbsd.txt` error. This is caused by a conflict between JARs included by the Firebase Admin SDK — specifically, the grpc-netty-shaded dependency used internally by Firebase. One library includes META-INF/license as a file, while another expects it to be a directory, which causes tools.build to fail when merging the classpath. To resolve this, you need to add `:exclude [#"META-INF/license/LICENSE.*"]` to the b/uber call in your build.clj. This safely skips the conflicting license files while still including all required Firebase functionality.
 
 
 # Electric v3 Starter App
