@@ -8,7 +8,7 @@
                [electric-starter-app.firebase-client :as fbc]
                [cljs.pprint :refer [pprint]])
      :clj
-     (:require [electric-starter-app.firebase-server :as fbs]
+     (:require [electric-starter-app.firebase-server :as fbs :refer [when-verified when-verified-strict]]
                [electric-starter-app.restricted :as restricted]
                [clojure.pprint :refer [pprint]])))
 
@@ -20,11 +20,6 @@
                   *print-fn* (fn [s] (.append sb s))]
           (pprint x))
         (str sb))))
-
-
-(e/defn TopSecretStuff
-  []
-  (dom/div (dom/text "This is a top secret message. You shouldn't see it unless you're logged in")))
 
 
 (e/defn LogoutButton
@@ -54,26 +49,37 @@
     (dom/p (dom/text "ID Token: " id-token))
     (dom/p (dom/text "UID: " (some-> (db/get-user client-db) .-uid)))
     (dom/p (dom/text "Token Verification:\n"))
-    (dom/pre (dom/code (dom/text (pprint-str (e/server (fbs/verify-id-token id-token))))))))
+    (dom/pre (dom/code (dom/text (pprint-str (e/server (fbs/verify-id-token id-token))))))
+    (dom/p (dom/text "User notes (all users):"))
+    (dom/pre (dom/code (dom/text (pprint-str all-user-notes))))))
 
 
 
 (e/defn LoggedIn
-  [client-db]
-  (let [user-email (some-> (db/get-user client-db) .-email)]
+  [client-db id-token]
+  (let [user-email (some-> (db/get-user client-db) .-email)
+        ;; When calling server functions that require auth, wrap them in `when-verified`
+        ;; or `when-verified-strict` and pass in the Firebase id-token. On the server, when
+        user-note (e/server (when-verified id-token restricted/get-note))]
     ;; TODO add demo of performing secure action on the server, by passing id-token and verifying it on the server
     (dom/h2 (dom/text "You are logged in"))
     (dom/p (dom/text "You are logged in as " user-email))
-    (LogoutButton)))
-
-
-;; TODO add display of user info from server
-;; TODO add button to LoggedIn to do server side action
-;(dom/button
-;  (let [[spend _err] (e/Token (dom/On "click" identity nil))]
-;    (dom/props {:disabled (boolean spend)})
-;    (when spend
-;      (spend (e/server (transact! my-tx))))))
+    (LogoutButton)
+    (dom/p (dom/text "Note"))
+    (let [!s (atom user-note)
+          s (e/watch !s)]
+      (dom/p
+        (dom/textarea
+          (dom/text s)
+          (dom/On "input" (fn [e] (reset! !s (-> e .-target .-value))) s)))
+      (dom/p
+        (dom/button (dom/text "Save note")
+          (let [[spend err] (e/Token (dom/On "click" identity nil))]
+            (dom/props {:disabled (boolean spend)}
+              (when spend
+                ;; For sensitive operations use fbs/when-verified-strict
+                ;; which checks whether the token has been revoked.
+                (spend (e/server (when-verified-strict id-token restricted/set-note! s)))))))))))
 
 
 (e/defn LoggedOut
@@ -92,6 +98,6 @@
         (let [client-db  (e/watch !client-db)
               id-token   (db/get-id-token client-db)]
           (if (e/server (:verified (fbs/verify-id-token id-token)))
-            (LoggedIn client-db)
+            (LoggedIn client-db id-token)
             (LoggedOut client-db))
           (DebugInfo client-db))))))
