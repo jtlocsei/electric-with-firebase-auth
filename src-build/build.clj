@@ -58,5 +58,6 @@ application classpath to be available"
     (b/uber {:class-dir class-dir
              :uber-file (str "target/" jar-name)
              :basis     (b/create-basis {:project "deps.edn" :aliases aliases})
+             ; Exclusion to avoid conflict between JARs included by the Firebase Admin SDK. See README.md
              :exclude [#"META-INF/license/LICENSE.*"]})
     (log/info jar-name)))
