@@ -17,10 +17,14 @@
 ;; Note: In production, use environment variables instead of a JSON file
 ;; SECURITY WARNING: Never commit your service account key to source control!
 ;; The .gitignore file is set up to prevent this, but be careful if you rename or move the file.
-(defonce _firebase-initialisation ; use defonce to make sure code only runs once
-  (let [stream      (io/input-stream ".secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json")
+;; Further reading:
+;; https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments
+(defonce _firebase-initialisation  ; use defonce to make sure code only runs once
+  (let [path        (or (System/getenv "GOOGLE_APPLICATION_CREDENTIALS")
+                      ".secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json")
+        stream      (io/input-stream path)
         credentials (GoogleCredentials/fromStream stream)
-        options     (-> (FirebaseOptions/builder) ; line 134
+        options     (-> (FirebaseOptions/builder)
                       (.setCredentials credentials)
                       (.build))]
     (FirebaseApp/initializeApp options)))
