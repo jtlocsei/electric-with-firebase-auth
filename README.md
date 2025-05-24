@@ -1,5 +1,9 @@
 # Firebase Auth With Electric 
 
+This example demonstrates how to implement Firebase Authentication in an Electric application. It shows a complete authentication flow including Google OAuth sign-in, secure server-side verification of Firebase ID tokens, and protected resources. The demo includes a simple notes feature where authenticated users can save private text, demonstrating how to secure server-side operations. While the example uses in-memory storage, the patterns shown here apply equally when working with databases or other protected resources.
+
+**Security Notice**: While this example follows Firebase's documentation and best practices, the author is not a security expert. This code is provided as a learning resource and starting point - you should thoroughly review and test any authentication implementation before using it in production. Use at your own risk.
+
 ## db.cljs
 The `db.cljs` file serves as a simple client-side state management system for the Firebase authentication data. Here are its main purposes:
 
