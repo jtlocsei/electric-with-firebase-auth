@@ -47,6 +47,38 @@ The `firebase_client.cljs` file serves as the client-side Firebase authenticatio
 The file acts as a bridge between Firebase's JavaScript SDK and the rest of the Electric application, handling all client-side authentication concerns and maintaining the authentication state that can be used by other parts of the application.
 
 
+## firebase_server.clj
+The `firebase_server.clj` file serves as the server-side security layer for Firebase authentication. Here are its main purposes:
+
+1. **Firebase SDK Initialization**
+   - Initializes the Firebase Admin SDK using service account credentials
+   - For development, uses a secret JSON file for authentication
+   - In production, credentials should be read from environment variables instead of JSON files
+
+2. **Token Verification**
+   - Provides functions to verify Firebase ID tokens:
+     - `verify-id-token`: Core verification function that checks if a token is valid
+     - `when-verified`: Helper that runs a function only if token is valid (fast check)
+     - `when-verified-strict`: Stricter version that also checks for token revocation (slower but more secure)
+
+3. **Claims Management**
+   - `token->claims-map`: Converts Firebase token claims into a Clojure map
+   - Handles conversion of Java/Guava maps to proper Clojure maps
+   - Extracts user information like user ID, email, etc.
+
+4. **Session Management**
+   - `revoke-refresh-tokens`: Allows revoking a user's refresh tokens for security purposes
+   - Tracks token revocation timestamps
+
+The file ensures that only authenticated users with valid tokens can access protected resources. It's used in conjunction with `restricted.clj` to implement secure endpoints and data access.
+
+Example usage from `main.cljc`:
+```clojure
+(e/server (when-verified id-token restricted/get-note))
+```
+This verifies the user's token before allowing access to restricted functionality.
+
+
 
 # Electric v3 Starter App
 
