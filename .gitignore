@@ -9,3 +9,5 @@ node_modules
 .aider.tags.cache.v3
 .aider.chat.history.md
 .aider.input.history
+target
+resources/electric-manifest.edn
