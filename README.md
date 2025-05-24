@@ -4,6 +4,23 @@ This example demonstrates how to implement Firebase Authentication in an Electri
 
 **Security Notice**: While this example follows Firebase's documentation and best practices, the author is not a security expert. This code is provided as a learning resource and starting point - you should thoroughly review and test any authentication implementation before using it in production. Use at your own risk.
 
+## Authentication Approach
+
+This example demonstrates a pattern for protecting server-side resources in Electric applications:
+
+1. The client stores the Firebase ID token in an atom (`!client-db`) when users authenticate
+2. Protected server functions expect this ID token as an argument
+3. All `e/server` calls that access sensitive data or perform protected operations must:
+   - Pass the ID token from the client
+   - Wrap the operation in `when-verified` or `when-verified-strict` on the server
+   - These verify the token is valid before allowing access
+4. The server extracts the user's Firebase UID from the verified token to:
+   - Ensure users can only access their own data
+   - Associate data with specific users
+   - Track who performed what operations
+
+This approach ensures that every protected server operation explicitly verifies authentication, rather than relying on session state or ambient authority.
+
 ## Setup
 
 Before using this example, you'll need to:
