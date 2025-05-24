@@ -14,7 +14,8 @@
 ;; 2. Click "Generate New Private Key"
 ;; 3. Save the downloaded JSON file in your .secret directory
 ;; 4. Update the path below to match your JSON filename
-;; Note: In production, use environment variables instead of a JSON file
+;; Note: In production, use GOOGLE_APPLICATION_CREDENTIALS environment variable to specify path
+;; to JSON file instead of hard-coding it.
 ;; SECURITY WARNING: Never commit your service account key to source control!
 ;; The .gitignore file is set up to prevent this, but be careful if you rename or move the file.
 ;; Further reading:
