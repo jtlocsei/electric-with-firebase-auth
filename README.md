@@ -1,3 +1,8 @@
+# Firebase Auth With Electric 
+
+// Add description of db.cljs purpose including what information is stored in it. AI!
+
+
 # Electric v3 Starter App
 
 ## Links
