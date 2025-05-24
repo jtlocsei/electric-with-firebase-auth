@@ -109,6 +109,46 @@ Here are its main purposes:
 
 The file demonstrates a pattern for implementing protected resources in an Electric application using Firebase authentication. While this example uses simple in-memory storage, the same pattern applies when accessing databases or other sensitive resources.
 
+## main.cljc
+The `main.cljc` file demonstrates a complete Firebase authentication flow in an Electric application. Here's a breakdown:
+
+1. **Main Components**
+   - `LogoutButton`: Simple button that triggers Firebase sign-out
+   - `SignInWithGoogleButton`: Button to initiate Google OAuth login
+   - `DebugInfo`: Displays authentication state and user data for debugging
+   - `LoggedIn`: UI component shown to authenticated users
+   - `LoggedOut`: UI component shown to unauthenticated users
+
+2. **Authentication Flow**
+   ```clojure
+   (e/defn Main [ring-request]
+     (e/client
+       ;; ... 
+       (let [client-db  (e/watch !client-db)
+             id-token   (db/get-id-token client-db)]
+         (if (e/server (:verified (fbs/verify-id-token id-token)))
+           (LoggedIn client-db id-token)
+           (LoggedOut client-db)))))
+   ```
+   - Watches the client-side database for auth state changes
+   - Verifies the ID token on the server
+   - Shows different UI based on auth state
+
+3. **Protected Features Demo**
+   ```clojure
+   (e/defn LoggedIn [client-db id-token]
+     (let [user-note (e/server (when-verified id-token restricted/get-note))]
+       ;; ... textarea for editing note ...
+       (dom/button 
+         ;; ... save note with stricter verification ...
+         (when spend
+           (spend (e/server (when-verified-strict id-token restricted/set-note! s)))))))
+   ```
+   - Demonstrates secure server calls using `when-verified` and `when-verified-strict`
+   - Shows a simple "notes" feature where each user can save private text
+   - Illustrates different security levels (basic vs strict verification)
+
+The demo serves as both a reference implementation and a starting point for adding Firebase authentication to Electric applications. It shows best practices for secure client-server communication and how to protect server-side resources.
 
 
 # Electric v3 Starter App
