@@ -86,6 +86,54 @@
   :_)
 
 
+(defn ^:private when-verified*
+  "Internal helper. Verifies the Firebase ID token using `verify-id-token`.
+   If the token is valid, calls (f claims & args), where `claims` is the map
+   returned from the decoded token.
+
+   The Firebase UID is available under (:user_id claims).
+
+   If the token is invalid or revoked, returns nil and does not invoke `f`.
+
+   - `check-revoked?`: boolean, whether to check for token revocation (slower but more secure)
+   - `f`: function to call with claims and any args
+   - `id-token`: Firebase ID token (JWT string)
+   - `args`: optional additional args passed to `f`"
+  [id-token check-revoked? f & args]
+  (let [{:keys [verified claims]} (verify-id-token id-token :check-revoked check-revoked?)]
+    (when verified
+      (apply f claims args))))
+
+
+(defn when-verified
+  "Verifies the Firebase ID token and, if valid, calls (f claims & args),
+   where `claims` is the decoded Firebase claims map.
+
+   The Firebase UID is available under (:user_id claims).
+
+   If the token is invalid or expired, returns nil and does not invoke `f`.
+
+   Does NOT check whether the token has been revoked."
+  [id-token f & args]
+  (apply when-verified* id-token false f args))
+
+
+(defn when-verified-strict
+  "Verifies the Firebase ID token and checks whether it has been revoked. It's slower
+  than verify-call because it makes a call to the Firebase server to check whether the
+  token has been revoked, but also more secure for the same reason. See Firebase docs
+  https://firebase.google.com/docs/auth/admin/manage-sessions#detect_id_token_revocation
+
+  If token is valid and not revoked, calls (f claims & args), where `claims` is the
+  decoded Firebase claims map.
+
+  The Firebase UID is available under (:user_id claims).
+
+  If the token is invalid, expired, or revoked, returns nil and does not invoke `f`."
+  [id-token f & args]
+  (apply when-verified* id-token true f args))
+
+
 (defn revoke-refresh-tokens
   "Revokes a user's refresh tokens and returns the revocation timestamp in seconds."
   [uid]
@@ -99,47 +147,3 @@
 (comment
   (revoke-refresh-tokens "eS7I5nyzXbYvbIxQje7nmTRUGKv1")
   :_)
-
-
-(defn ^:private with-auth*
-  "Internal helper. Verifies the Firebase ID token using `verify-id-token`.
-   If the token is valid, calls (f claims & args), where `claims` is the map
-   returned from the decoded token.
-
-   The Firebase UID is available under (:user_id claims).
-
-   If the token is invalid or revoked, returns nil and does not invoke `f`.
-
-   - `id-token`: Firebase ID token (JWT string)
-   - `check-revoked?`: boolean, whether to reject revoked tokens
-   - `f`: function to call with claims and any args
-   - `args`: optional additional args passed to `f`"
-  [id-token check-revoked? f & args]
-  (let [{:keys [verified claims]} (verify-id-token id-token :check-revoked check-revoked?)]
-    (when verified
-      (apply f claims args))))
-
-
-(defn with-auth
-  "Verifies the Firebase ID token and, if verified, calls (f claims & args),
-   where `claims` is the decoded Firebase claims map.
-
-   The Firebase UID is available under (:user_id claims).
-
-   If the token is invalid or revoked, returns nil and does not invoke `f`.
-
-   Does NOT check whether the token has been revoked."
-  [id-token f & args]
-  (apply with-auth* id-token false f args))
-
-
-(defn with-auth-check-revoked
-  "Verifies the Firebase ID token and checks whether it has been revoked.
-   If verified and not revoked, calls (f claims & args), where `claims` is the
-   decoded Firebase claims map.
-
-   The Firebase UID is available under (:user_id claims).
-
-   If the token is invalid or revoked, returns nil and does not invoke `f`."
-  [id-token f & args]
-  (apply with-auth* id-token true f args))
