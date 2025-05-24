@@ -1,5 +1,43 @@
 # Firebase Auth With Electric 
 
+
+// Tun comments below into markdown description to go in this file. AI!
+[//]: # (The db.cljs file serves as a simple client-side state management system for the Firebase authentication data. Here are its main purposes:)
+
+[//]: # ()
+[//]: # (1 It maintains a central atom &#40;!client-db&#41; that stores authentication-related state on the client side, specifically:                                     )
+
+[//]: # (• The current user object &#40;:user key&#41;                                                                                                                  )
+
+[//]: # (• The current ID token &#40;:id-token key&#41;                                                                                                                 )
+
+[//]: # (2 It provides a clean API with getter and setter functions to manipulate this state:                                                                      )
+
+[//]: # (• set-user/remove-user/get-user - to manage the Firebase user object                                                                                   )
+
+[//]: # (• set-id-token/remove-id-token/get-id-token - to manage the Firebase ID token                                                                          )
+
+[//]: # (3 This abstraction is used by firebase_client.cljs to keep track of authentication state changes and ID token updates from Firebase, and by main.cljc to  )
+
+[//]: # (access the current authentication state for rendering the UI appropriately.)
+
+[//]: # ()
+[//]: # (The file is intentionally simple, just providing a centralized place to store and access authentication state, rather than having it scattered throughout  )
+
+[//]: # (the application. This makes it easier to:)
+
+[//]: # ()
+[//]: # (• Track authentication state changes                                                                                                                      )
+
+[//]: # (• Access the current user's information                                                                                                                   )
+
+[//]: # (• Access the current ID token for making authenticated requests to the server                                                                             )
+
+[//]: # (• Modify how authentication state is stored if needed in the future)
+
+[//]: # ()
+[//]: # (The file uses ClojureScript &#40;cljs&#41; specifically because it's meant to run in the browser where the Firebase client SDK operates.)
+
 The `db.cljs` file manages client-side authentication state for Firebase. It maintains a central atom (!client-db) that stores:
 - The current Firebase user object (email, uid, etc)
 - The current Firebase ID token for making authenticated requests
