@@ -1,5 +1,6 @@
 (ns prod
   #?(:cljs (:require-macros [prod :refer [comptime-resource]]))
+  #?(:clj (:gen-class)) ; JTL added
   (:require clojure.edn
             #?(:clj clojure.java.io)
             #?(:clj [clojure.tools.logging :as log])

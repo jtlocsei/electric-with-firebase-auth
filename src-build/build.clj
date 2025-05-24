@@ -54,11 +54,16 @@ application classpath to be available"
   (b/copy-dir {:target-dir class-dir :src-dirs ["src" "src-prod" "resources"]})
   (let [jar-name (or (some-> jar-name str) ; override for Dockerfile builds to avoid needing to reconstruct the name
                    (format "electricfiddle-%s.jar" electric-user-version))
-        aliases [:prod]]
+        aliases [:prod]
+        basis (b/create-basis {:project "deps.edn" :aliases aliases})] ; JTL added line
+    ;; JTL added b/compile-clj form below
+    (b/compile-clj {:basis basis
+                    :ns-compile '[prod]
+                    :class-dir class-dir})
     (b/uber {:class-dir class-dir
              :uber-file (str "target/" jar-name)
-             :basis     (b/create-basis {:project "deps.edn" :aliases aliases})
-             :main      'prod
-             ; Exclusion to avoid conflict between JARs included by the Firebase Admin SDK. See README.md
+             :basis     basis ; JTL changed line
+             :main      'prod ; JTL added line
+             ; JTL added exclusion to avoid conflict between JARs included by the Firebase Admin SDK. See README.md
              :exclude [#"META-INF/license/LICENSE.*"]})
     (log/info jar-name)))
