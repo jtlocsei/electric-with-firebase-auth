@@ -1,6 +1,10 @@
 # Firebase Auth With Electric 
 
-// Add description of db.cljs purpose including what information is stored in it. AI!
+The `db.cljs` file manages client-side authentication state for Firebase. It maintains a central atom (!client-db) that stores:
+- The current Firebase user object (email, uid, etc)
+- The current Firebase ID token for making authenticated requests
+
+This provides a single source of truth for authentication state and a clean API for accessing/updating it throughout the application.
 
 
 # Electric v3 Starter App
