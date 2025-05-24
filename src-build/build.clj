@@ -57,5 +57,6 @@ application classpath to be available"
         aliases [:prod]]
     (b/uber {:class-dir class-dir
              :uber-file (str "target/" jar-name)
-             :basis     (b/create-basis {:project "deps.edn" :aliases aliases})})
+             :basis     (b/create-basis {:project "deps.edn" :aliases aliases})
+             :exclude [#"META-INF/license/LICENSE.*"]})
     (log/info jar-name)))
