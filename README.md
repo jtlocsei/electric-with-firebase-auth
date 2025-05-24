@@ -31,6 +31,7 @@ Before using this example, you'll need to:
 - Never commit the Firebase Admin SDK JSON file to version control
 - The `.gitignore` file already excludes `.secret/` to help prevent this
 - For production deployment, use environment variables for Firebase credentials instead of JSON files
+- The `DebugInfo` component in `main.cljc` exposes sensitive information and should never be used in production
 
 **Further Reading**:
 - [Firebase Web Authentication Guide](https://firebase.google.com/docs/auth/web/start) - Essential reading for understanding how Firebase authentication works in web applications

@@ -39,6 +39,8 @@
 
 
 (e/defn DebugInfo
+  "SECURITY WARNING: This component exposes sensitive information like ID tokens
+   and should NEVER be used in production. It exists only to help during development."
   [client-db]
   (e/client)
   (let [id-token (db/get-id-token client-db)
