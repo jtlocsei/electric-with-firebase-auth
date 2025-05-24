@@ -4,6 +4,34 @@ This example demonstrates how to implement Firebase Authentication in an Electri
 
 **Security Notice**: While this example follows Firebase's documentation and best practices, the author is not a security expert. This code is provided as a learning resource and starting point - you should thoroughly review and test any authentication implementation before using it in production. Use at your own risk.
 
+## Setup
+
+Before using this example, you'll need to:
+
+1. **Create a Firebase Project**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project
+   - Enable Google Authentication in the Authentication section
+
+2. **Get Firebase Web Config**
+   - In Firebase Console, go to Project Settings
+   - Under "Your apps", add a web app if you haven't already
+   - Copy the Firebase config object
+   - Replace the `firebase-config` in `src/electric_starter_app/firebase_client.cljs` with your config
+
+3. **Get Admin SDK Credentials**
+   - In Firebase Console, go to Project Settings > Service Accounts
+   - Click "Generate New Private Key"
+   - Create a `.secret` directory in your project root
+   - Save the downloaded JSON file in the `.secret` directory
+   - Update the path in `src/electric_starter_app/firebase_server.clj` to match your JSON filename
+   - Note: In production, you should use environment variables instead of this JSON file
+
+**Security Notes**: 
+- Never commit the Firebase Admin SDK JSON file to version control
+- The `.gitignore` file already excludes `.secret/` to help prevent this
+- For production deployment, use environment variables for Firebase credentials instead of JSON files
+
 ## db.cljs
 The `db.cljs` file serves as a simple client-side state management system for the Firebase authentication data. Here are its main purposes:
 
