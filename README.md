@@ -1,5 +1,6 @@
 # Firebase Auth With Electric 
 
+## db.cljs
 The `db.cljs` file serves as a simple client-side state management system for the Firebase authentication data. Here are its main purposes:
 
 1. It maintains a central atom (`!client-db`) that stores authentication-related state on the client side, specifically:
@@ -18,6 +19,32 @@ The file is intentionally simple, just providing a centralized place to store an
 - Access the current user's information  
 - Access the current ID token for making authenticated requests to the server
 - Modify how authentication state is stored if needed in the future
+
+## firebase_client.cljs
+The `firebase_client.cljs` file serves as the client-side Firebase authentication interface. Here are its main purposes:
+
+1. **Firebase Initialization**
+   - Configures and initializes the Firebase app with credentials
+   - Sets up the Google authentication provider
+
+2. **Authentication Functions**
+   - Provides functions for signing in with Google (`sign-in-with-google`)
+   - Handles signing out (`sign-out`)
+   - Contains commented examples for email/password authentication
+
+3. **Token Management**
+   - Manages Firebase ID tokens, which are used for authenticated requests
+   - Automatically refreshes ID tokens:
+     - When the browser tab becomes visible
+     - Every 5 minutes as a fallback
+     - When authentication state changes
+
+4. **State Tracking**
+   - Maintains authentication state in the client database (`!client-db`)
+   - Tracks both the user object and ID token
+   - Uses Firebase's `onAuthStateChanged` and `onIdTokenChanged` listeners to keep the client state in sync
+
+The file acts as a bridge between Firebase's JavaScript SDK and the rest of the Electric application, handling all client-side authentication concerns and maintaining the authentication state that can be used by other parts of the application.
 
 
 
