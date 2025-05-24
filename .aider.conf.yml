@@ -1,0 +1,23 @@
+# See docs https://aider.chat/docs/config/aider_conf.html
+
+###############
+# Git settings:
+
+## Enable/disable adding .aider* to .gitignore (default: True)
+gitignore: false
+
+## Enable/disable auto commit of LLM changes (default: True)
+auto-commits: false
+
+
+
+#################
+# Other settings:
+## specify a read-only file (can be used multiple times)
+#read: xxx
+## Specify multiple values like this:
+#read:
+#  - xxx
+#  - yyy
+#  - zzz
+# read: CONVENTIONS.md
