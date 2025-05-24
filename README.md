@@ -42,7 +42,7 @@ Before using this example, you'll need to:
    - Create a `.secret` directory in your project root
    - Save the downloaded JSON file in the `.secret` directory
    - Update the path in `src/electric_starter_app/firebase_server.clj` to match your JSON filename
-   - Note: In production, you should use environment variables instead of this JSON file
+   - Note: In production, you should use an environment variable to specify path to this JSON file instead of hard-coding it.
 
 **Security Notes**: 
 - Never commit the Firebase Admin SDK JSON file to version control
