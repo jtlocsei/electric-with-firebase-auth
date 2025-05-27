@@ -1,7 +1,5 @@
 # Firebase Auth With Electric 
 
-TODO Add note about init-firebase! in dev.cljc and prod.cljc
-
 This example demonstrates how to implement Firebase Authentication in an Electric application. It shows a complete authentication flow including Google OAuth sign-in, secure server-side verification of Firebase ID tokens, and protected resources. The demo includes a simple notes feature where authenticated users can save private text, demonstrating how to secure server-side operations. While the example uses in-memory storage, the patterns shown here apply equally when working with databases or other protected resources.
 
 **Security Notice**: While this example follows Firebase's documentation and best practices, the author is not a security expert. This code is provided as a learning resource and starting point - you should thoroughly review and test any authentication implementation before using it in production. Use at your own risk.
@@ -45,6 +43,7 @@ Before using this example, you'll need to:
    - Save the downloaded JSON file in the `.secret` directory
    - Update the path in `src/electric_starter_app/firebase_server.clj` to match your JSON filename
    - Note: In production, you should use an environment variable to specify path to this JSON file instead of hard-coding it.
+   - Important: Both `dev.cljc` and `prod.cljc` call `init-firebase!` during application startup to initialize the Firebase Admin SDK
 
 **Security Notes**: 
 - Never commit the Firebase Admin SDK JSON file to version control
@@ -148,6 +147,7 @@ The `firebase_server.clj` file serves as the server-side security layer for Fire
 
 1. **Firebase SDK Initialization**
    - Initializes the Firebase Admin SDK using service account credentials
+   - Provides the `init-firebase!` function that is called during startup in both `dev.cljc` and `prod.cljc`
    - For development, uses a secret JSON file for authentication
    - In production, credentials should be read from environment variables instead of JSON files
 
