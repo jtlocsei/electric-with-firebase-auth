@@ -20,7 +20,8 @@
 ;; The .gitignore file is set up to prevent this, but be careful if you rename or move the file.
 ;; Further reading:
 ;; https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments
-(defonce _firebase-initialisation  ; use defonce to make sure code only runs once
+(defn init-firebase! ; called in dev.clj and prod.cljc
+  []
   (let [path        (or (System/getenv "GOOGLE_APPLICATION_CREDENTIALS")
                       ".secret/electric-auth-firebase-adminsdk-fbsvc-a484b36f6c.json")
         stream      (io/input-stream path)

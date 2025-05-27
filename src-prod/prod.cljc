@@ -6,6 +6,7 @@
             #?(:clj [clojure.tools.logging :as log])
             [contrib.assert :refer [check]]
             electric-starter-app.main
+            #?(:clj [electric-starter-app.firebase-server :as firebase-server])
             #?(:clj [electric-starter-app.server-jetty :as jetty])
             [hyperfiddle.electric3 :as e]
             #?(:cljs [hyperfiddle.electric-client3])))
@@ -28,6 +29,7 @@
 
 #?(:clj ; server entrypoint
    (defn -main [& {:strs [] :as args}] ; clojure.main entrypoint, args are strings
+     (firebase-server/init-firebase!)
      (alter-var-root #'config #(merge % args))
      (log/info (pr-str config))
      (check string? (:hyperfiddle.electric-ring-adapter3/electric-user-version config))

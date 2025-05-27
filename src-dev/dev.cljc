@@ -4,6 +4,7 @@
    electric-starter-app.main
    [hyperfiddle.electric3 :as e]
    #?(:cljs hyperfiddle.electric-client3)
+   #?(:clj [electric-starter-app.firebase-server :as firebase-server])
    #?(:clj [electric-starter-app.server-jetty :as jetty])
    #?(:clj [shadow.cljs.devtools.api :as shadow])
    #?(:clj [shadow.cljs.devtools.server :as shadow-server])
@@ -22,6 +23,8 @@
           "public/electric_starter_app/js/manifest.edn"}))
 
      (defn -main [& args]
+       (firebase-server/init-firebase!)
+
        (log/info "Starting Electric compiler and server...")
 
        (shadow-server/start!) ; no-op in calva shadow-cljs configuration which starts this out of band
