@@ -210,6 +210,32 @@ When building an uberjar, you may encounter a `Cannot write META-INF/license/LIC
 
 Also had to make modifications to `prod.cljs` and `build.clj` in order to be able to run the uberjar with `java -jar target/app.jar`. See comments in those files labelled with initials `JTL`.
 
+## Case-sensitivity issue with uberjar
+
+When building an uberjar to be run with `java -jar target/app.jar`, you may encounter the following error when running the jar:
+
+```
+Exception in thread "main" java.lang.NoClassDefFoundError: hyperfiddle/electric3$Apply (wrong name: hyperfiddle/electric3$apply)
+```
+
+I believe this error occurs due to a case-sensitivity issue with the Clojure compiler when compiling `hyperfiddle.electric3/apply` and `hyperfiddle.electric3/Apply` on case-insensitive filesystems (like the default macOS filesystem). Both functions try to compile to the same filename on a case-insensitive system, causing the conflict.
+
+### Solution
+
+The most reliable solution is to build the uberjar inside a Docker container with a case-sensitive filesystem. The starter app includes a Dockerfile.builder for this purpose. To build the uberjar, use this one-liner, which builds the app inside Docker and extracts the resulting jar file, which will work correctly with `java -jar target/app.jar`.
+
+```bash
+VERSION=$(git describe --tags --long --always --dirty) \
+&& docker build -f Dockerfile.builder --build-arg VERSION=$VERSION -t electric3-starter-app-builder . \
+&& docker create --name extract-electric electric3-starter-app-builder \
+&& rm -rf target && mkdir -p target \
+&& docker cp extract-electric:/app/target/app.jar target/app.jar \
+&& docker rm extract-electric \
+&& echo "✅ Built target/app.jar with version: $VERSION"
+```
+
+
+
 
 # Electric v3 Starter App
 
