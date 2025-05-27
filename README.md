@@ -204,13 +204,17 @@ Here are its main purposes:
 
 The file demonstrates a pattern for implementing protected resources in an Electric application using Firebase authentication. While this example uses simple in-memory storage, the same pattern applies when accessing databases or other sensitive resources.
 
-## build.clj modification for uberjar
+## Building an Uberjar
 
-When building an uberjar, you may encounter a `Cannot write META-INF/license/LICENSE.aix-netbsd.txt` error. This is caused by a conflict between JARs included by the Firebase Admin SDK — specifically, the grpc-netty-shaded dependency used internally by Firebase. One library includes META-INF/license as a file, while another expects it to be a directory, which causes tools.build to fail when merging the classpath. To resolve this, you need to add `:exclude [#"META-INF/license/LICENSE.*"]` to the b/uber call in your build.clj. This safely skips the conflicting license files while still including all required Firebase functionality.
+### META-INF License File Conflict
 
-Also had to make modifications to `prod.cljs` and `build.clj` in order to be able to run the uberjar with `java -jar target/app.jar`. See comments in those files labelled with initials `JTL`.
+When building an uberjar, you may encounter a `Cannot write META-INF/license/LICENSE.aix-netbsd.txt` error. This is caused by a conflict between JARs included by the Firebase Admin SDK — specifically, the grpc-netty-shaded dependency used internally by Firebase. One library includes META-INF/license as a file, while another expects it to be a directory, which causes tools.build to fail when merging the classpath. 
 
-## Case-sensitivity issue with uberjar
+To resolve this, you need to add `:exclude [#"META-INF/license/LICENSE.*"]` to the b/uber call in your build.clj. This safely skips the conflicting license files while still including all required Firebase functionality.
+
+### Creating a Standalone Executable Jar
+
+To create an uberjar that can be run with `java -jar target/app.jar`, modifications were made to `prod.cljc` and `build.clj`. See comments in those files labelled with initials `JTL`.
 
 When building an uberjar to be run with `java -jar target/app.jar`, you may encounter the following error when running the jar:
 
@@ -218,9 +222,7 @@ When building an uberjar to be run with `java -jar target/app.jar`, you may enco
 Exception in thread "main" java.lang.NoClassDefFoundError: hyperfiddle/electric3$Apply (wrong name: hyperfiddle/electric3$apply)
 ```
 
-I believe this error occurs due to a case-sensitivity issue with the Clojure compiler when compiling `hyperfiddle.electric3/apply` and `hyperfiddle.electric3/Apply` on case-insensitive filesystems (like the default macOS filesystem). Both functions try to compile to the same filename on a case-insensitive system, causing the conflict.
-
-### Solution
+I think this error occurs due to a case-sensitivity issue with the Clojure compiler when compiling `hyperfiddle.electric3/apply` and `hyperfiddle.electric3/Apply` on case-insensitive filesystems (like the default macOS filesystem). Both functions try to compile to the same filename on a case-insensitive system, causing the conflict.
 
 The most reliable solution is to build the uberjar inside a Docker container with a case-sensitive filesystem. The starter app includes a Dockerfile.builder for this purpose. To build the uberjar, use this one-liner, which builds the app inside Docker and extracts the resulting jar file, which will work correctly with `java -jar target/app.jar`.
 
