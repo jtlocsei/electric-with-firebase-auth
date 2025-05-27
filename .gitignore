@@ -11,3 +11,4 @@ node_modules
 .aider.input.history
 target
 resources/electric-manifest.edn
+.aider.tags.cache.v4
