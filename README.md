@@ -1,8 +1,8 @@
 # Firebase Auth With Electric Clojure
 
-This example demonstrates how to implement [Firebase Authentication](https://firebase.google.com/docs/auth/web/start) in an [Electric Clojure](https://github.com/hyperfiddle/electric) application. It shows a complete authentication flow including [Sign In With Google](https://firebase.google.com/docs/auth/web/google-signin), secure [server-side verification of Firebase ID tokens](https://firebase.google.com/docs/auth/admin/verify-id-tokens), and protected resources. The demo includes a simple notes feature where authenticated users can save private text, demonstrating how to secure server-side operations. While the example uses in-memory storage, the patterns shown here apply equally when working with databases or other protected resources.
-
 **Live demo**: https://electric-with-firebase-auth.mircloud.us/
+
+This example demonstrates how to implement [Firebase Authentication](https://firebase.google.com/docs/auth/web/start) in an [Electric Clojure](https://github.com/hyperfiddle/electric) application. It shows a complete authentication flow including [Sign In With Google](https://firebase.google.com/docs/auth/web/google-signin), secure [server-side verification of Firebase ID tokens](https://firebase.google.com/docs/auth/admin/verify-id-tokens), and protected resources. The demo includes a simple notes feature where authenticated users can save private text, demonstrating how to secure server-side operations. While the example uses in-memory storage, the patterns shown here apply equally when working with databases or other protected resources.
 
 If you'd like to learn more about Electric Clojure, it's worth joining the #hyperfiddle channel on https://clojurians.slack.com/. To find the Electric starter template, search the #hyperfiddle channel for `in:#hyperfiddle electric v3 beta url`. 
 
