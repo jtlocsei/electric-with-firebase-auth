@@ -8,7 +8,8 @@
                [electric-starter-app.firebase-client :as fbc]
                [cljs.pprint :refer [pprint]])
      :clj
-     (:require [electric-starter-app.firebase-server :as fbs :refer [when-verified when-verified-strict]]
+     (:require [electric-starter-app.firebase-server :as fbs
+                :refer [when-verified when-verified-strict verify-id-token]]
                [electric-starter-app.restricted :as restricted]
                [clojure.pprint :refer [pprint]])))
 
@@ -51,7 +52,7 @@
     (dom/p (dom/text "ID Token: " id-token))
     (dom/p (dom/text "UID: " (some-> (db/get-user client-db) .-uid)))
     (dom/p (dom/text "Token Verification:\n"))
-    (dom/pre (dom/code (dom/text (pprint-str (e/server (fbs/verify-id-token id-token))))))
+    (dom/pre (dom/code (dom/text (pprint-str (e/server (verify-id-token id-token))))))
     (dom/p (dom/text "User notes (all users):"))
     (dom/pre (dom/code (dom/text (pprint-str all-user-notes))))))
 

@@ -1,6 +1,10 @@
-# Firebase Auth With Electric 
+# Firebase Auth With Electric Clojure
 
-This example demonstrates how to implement Firebase Authentication in an Electric application. It shows a complete authentication flow including Google OAuth sign-in, secure server-side verification of Firebase ID tokens, and protected resources. The demo includes a simple notes feature where authenticated users can save private text, demonstrating how to secure server-side operations. While the example uses in-memory storage, the patterns shown here apply equally when working with databases or other protected resources.
+This example demonstrates how to implement [Firebase Authentication](https://firebase.google.com/docs/auth/web/start) in an [Electric Clojure](https://github.com/hyperfiddle/electric) application. It shows a complete authentication flow including [Sign In With Google](https://firebase.google.com/docs/auth/web/google-signin), secure [server-side verification of Firebase ID tokens](https://firebase.google.com/docs/auth/admin/verify-id-tokens), and protected resources. The demo includes a simple notes feature where authenticated users can save private text, demonstrating how to secure server-side operations. While the example uses in-memory storage, the patterns shown here apply equally when working with databases or other protected resources.
+
+**Live demo**: https://electric-with-firebase-auth.mircloud.us/
+
+If you'd like to learn more about Electric Clojure, it's worth joining the #hyperfiddle channel on https://clojurians.slack.com/. To find the Electric starter template, search the #hyperfiddle channel for `in:#hyperfiddle electric v3 beta url`. 
 
 **Security Notice**: While I've tried to follow Firebase's documentation and best practices, I am not a security expert. This code is provided as a learning resource and starting point - you should thoroughly review and test any authentication implementation before using it in production. Use at your own risk.
 
@@ -58,7 +62,7 @@ Before using this example, you'll need to:
 **Security Notes**: 
 - Never commit the Firebase Admin SDK JSON file to version control
 - The `.gitignore` file already excludes `.secret/` to help prevent this
-- For production deployment, use environment variables for Firebase credentials instead of JSON files
+- For production deployment, use an environment variable to specify the path of the Firebase secret JSON file instead of hard coding it.
 - The `DebugInfo` component in `main.cljc` exposes sensitive information and should never be used in production
 
 **Further Reading**:
@@ -72,13 +76,13 @@ The `db.cljs` file serves as a simple client-side state management system for th
    - The current user object (`:user` key)
    - The current ID token (`:id-token` key)
 
-2. It provides a clean API with getter and setter functions to manipulate this state:
+2. It provides getter and setter functions to manipulate this state:
    - `set-user`/`remove-user`/`get-user` - to manage the Firebase user object
    - `set-id-token`/`remove-id-token`/`get-id-token` - to manage the Firebase ID token
 
 3. This abstraction is used by `firebase_client.cljs` to keep track of authentication state changes and ID token updates from Firebase, and by `main.cljc` to access the current authentication state for rendering the UI appropriately.
 
-The file is intentionally simple, just providing a centralized place to store and access authentication state, rather than having it scattered throughout the application. This makes it easier to:
+The file provides a centralized place to store and access authentication state, rather than having it scattered throughout the application. This makes it easier to:
 
 - Track authentication state changes
 - Access the current user's information  
@@ -112,7 +116,7 @@ The `firebase_client.cljs` file serves as the client-side Firebase authenticatio
 The file acts as a bridge between Firebase's JavaScript SDK and the rest of the Electric application, handling all client-side authentication concerns and maintaining the authentication state that can be used by other parts of the application.
 
 ## main.cljc
-The `main.cljc` file demonstrates a complete Firebase authentication flow in an Electric application. Here's a breakdown:
+The `main.cljc` file demonstrates a Firebase authentication flow in an Electric application. Here's a breakdown:
 
 1. **Main Components**
    - `LogoutButton`: Simple button that triggers Firebase sign-out
@@ -128,7 +132,7 @@ The `main.cljc` file demonstrates a complete Firebase authentication flow in an 
        ;; ... 
        (let [client-db  (e/watch !client-db)
              id-token   (db/get-id-token client-db)]
-         (if (e/server (:verified (fbs/verify-id-token id-token)))
+         (if (e/server (:verified (verify-id-token id-token)))
            (LoggedIn client-db id-token)
            (LoggedOut client-db)))))
    ```
@@ -150,7 +154,7 @@ The `main.cljc` file demonstrates a complete Firebase authentication flow in an 
    - Shows a simple "notes" feature where each user can save private text
    - Illustrates different security levels (basic vs strict verification)
 
-The demo serves as both a reference implementation and a starting point for adding Firebase authentication to Electric applications. It shows best practices for secure client-server communication and how to protect server-side resources.
+The demo serves as both a reference implementation and a starting point for adding Firebase authentication to Electric applications. It shows how to protect server-side resources and actions.
 
 ## firebase_server.clj
 The `firebase_server.clj` file serves as the server-side security layer for Firebase authentication. Here are its main purposes:
@@ -158,12 +162,12 @@ The `firebase_server.clj` file serves as the server-side security layer for Fire
 1. **Firebase SDK Initialization**
    - Initializes the Firebase Admin SDK using service account credentials
    - Provides the `init-firebase!` function that is called during startup in both `dev.cljc` and `prod.cljc`
-   - For development, uses a secret JSON file for authentication
-   - In production, credentials should be read from environment variables instead of JSON files
+   - For development, uses hard-coded path to a secret JSON file for authentication
+   - In production, the path to the secret JSON file should be specified in an environment variable.
 
 2. **Token Verification**
    - Provides functions to verify Firebase ID tokens:
-     - `verify-id-token`: Core verification function that checks if a token is valid
+     - `verify-id-token`: Core verification function that checks if a token is valid, and if so returns a map of "claims" including the `:user_id`.
      - `when-verified`: Helper that runs a function only if token is valid (fast check)
      - `when-verified-strict`: Stricter version that also checks for token revocation (slower but more secure)
 
@@ -196,7 +200,7 @@ Here are its main purposes:
 2. **Protected Operations**
    - `get-note`: Retrieves a user's personal note based on their Firebase user ID
    - `set-note!`: Updates a user's personal note with new text
-   - Both functions expect Firebase claims as input (containing `:user_id`)
+   - Both functions expect a Firebase claims map as input (containing `:user_id`)
 
 3. **Security Integration**
    The file works in conjunction with `firebase_server.clj` - its functions must be called through verification wrappers:
