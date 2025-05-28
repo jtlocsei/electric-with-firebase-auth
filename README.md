@@ -36,7 +36,17 @@ Before using this example, you'll need to:
    - Copy the Firebase config object
    - Replace the `firebase-config` in `src/electric_starter_app/firebase_client.cljs` with your config
 
-3. **Get Admin SDK Credentials**
+3. **Configure Authorized Domains for Production (optional)**
+   - This step is required when deploying to production, otherwise authentication will fail on your live site. You don't need it for running the app on localhost.
+   - Go to https://console.firebase.google.com
+   - Select your project
+   - In the left sidebar:
+     - Click Authentication
+     - Then go to the Settings tab
+   - Scroll to Authorized Domains
+     - Click "Add domain"
+     - Enter your domain, e.g., myapp.example.com
+4. **Get Admin SDK Credentials**
    - In Firebase Console, go to Project Settings > Service Accounts
    - Click "Generate New Private Key"
    - Create a `.secret` directory in your project root
