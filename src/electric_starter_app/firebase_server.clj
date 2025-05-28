@@ -30,6 +30,9 @@
                       (.setCredentials credentials)
                       (.build))]
     (FirebaseApp/initializeApp options)))
+(comment
+  (init-firebase!)
+  :_)
 
 
 (defn token->claims-map
