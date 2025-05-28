@@ -65,6 +65,11 @@ Before using this example, you'll need to:
 - For production deployment, use an environment variable to specify the path of the Firebase secret JSON file instead of hard coding it.
 - The `DebugInfo` component in `main.cljc` exposes sensitive information and should never be used in production
 
+**Libraries Used**:
+- `com.google.firebase/firebase-admin {:mvn/version "9.4.3"}` in `deps.edn`
+- `"firebase": "^11.6.1"` in `package.json`
+- `"process": "^0.11.10"` in `package.json`. Needed in order for the firebase client-side library to work. This is a common issue when using shadow-cljs 3.x with various npm libraries - see [discussion on Clojurians slack](https://clojurians.slack.com/archives/C6N245JGG/p1745575597950839).
+
 **Further Reading**:
 - [Firebase Web Authentication Guide](https://firebase.google.com/docs/auth/web/start) - Essential reading for understanding how Firebase authentication works in web applications
 - [Firebase Token Verification Guide](https://firebase.google.com/docs/auth/admin/verify-id-tokens) - Important documentation about server-side token verification
@@ -155,6 +160,8 @@ The `main.cljc` file demonstrates a Firebase authentication flow in an Electric 
    - Illustrates different security levels (basic vs strict verification)
 
 The demo serves as both a reference implementation and a starting point for adding Firebase authentication to Electric applications. It shows how to protect server-side resources and actions.
+
+Note: Do NOT use [FirebaseUI](https://firebase.google.com/docs/auth/web/firebaseui) as it is [no longer maintained](https://github.com/firebase/firebaseui-web/issues/1084).
 
 ## firebase_server.clj
 The `firebase_server.clj` file serves as the server-side security layer for Firebase authentication. Here are its main purposes:
